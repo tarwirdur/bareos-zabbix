@@ -1,0 +1,56 @@
+### BAREOS CONFIG ###
+# see https://github.com/appsinet/bareos-zabbix
+
+# Use 'M' for MySQL
+# Use 'P' for PostgreSQL
+bareosDbSgdb='P'
+
+# IP address or FQDN of database server
+bareosDbAddr='127.0.0.1'
+
+# TCP port of database server
+bareosDbPort='5432'
+
+# Name of the database used by Bareos
+bareosDbName='bareos'
+
+# User used by Bareos on it's database
+bareosDbUser='bareos'
+
+# Password used by Bareos on it's database
+bareosDbPass='password'
+
+
+### ZABBIX CONFIG ###
+
+
+
+# Path to zabbix_sender command
+zabbixSender="/usr/bin/zabbix_sender"
+
+# uncomment if you want trace arguments
+# zabbixSender="$(dirname $0)/zabbix_sender_debug"
+
+# Get connection properies from zabbix_agentd.conf
+zabbixSenderCmd="$zabbixSender -c /etc/zabbix/zabbix_agentd.conf"
+
+
+# Or specify properties manual
+# # IP address or FQDN of Zabbix server
+# zabbixSrvAddr='127.0.0.1'
+# 
+# # TCP port of Zabbix server
+# zabbixSrvPort='10051'
+# 
+# # Name of host in zabbix
+# zabbixAgentHostname='bareos-server'
+# zabbixSenderCmd="$zabbixSender -z $zabbixSrvAddr -p $zabbixSrvPort -s $zabbixAgentHostname"
+
+case $bareosDbSgdb in
+  P)
+    export PGPASSWORD=$bareosDbPass
+    sql="/usr/bin/psql -h$bareosDbAddr -p$bareosDbPort -U$bareosDbUser -d$bareosDbName -At -c" ;;
+  M) sql="/usr/bin/mysql -N -B -h$bareosDbAddr -P$bareosDbPort -u$bareosDbUser -p$bareosDbPass -D$bareosDbName -e" ;;
+  *) exit 7 ;;
+esac
+
